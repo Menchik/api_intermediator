@@ -18,3 +18,6 @@ class base_intermediator:
 
     def get_basemap(self):
         pass
+
+    def download_files(self):
+        pass
