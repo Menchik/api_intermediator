@@ -5,6 +5,7 @@ import time
 
 from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
+import os
 
 from base_intermediator import base_intermediator
 
@@ -85,7 +86,14 @@ class planet_mm(base_intermediator):
     def download_files(self, num_threads, result):
 
         #### num_threads = 0 for max threads possible
+        result = result.json()
+        links = result['_links']['results']
+
+        if not os.path.exists('./downloads'):
+            os.mkdir('./downloads')
+
+        os.chdir('./downloads')
 
         if(num_threads == 0):
             num_threads = cpu_count()-1
-        results = ThreadPool(num_threads).imap_unordered(download_from_url, result)
+        results = ThreadPool(num_threads).imap_unordered(download_from_url, links)
