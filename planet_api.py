@@ -86,6 +86,9 @@ class planet_mm(base_intermediator):
     def download_files(self, num_threads, result):
 
         #### num_threads = 0 for max threads possible
+
+        cwd = os.getcwd()
+ 
         result = result.json()
         links = result['_links']['results']
 
@@ -96,4 +99,8 @@ class planet_mm(base_intermediator):
 
         if(num_threads == 0):
             num_threads = cpu_count()-1
-        results = ThreadPool(num_threads).imap_unordered(download_from_url, links)
+        dwnl_result = ThreadPool(num_threads).imap_unordered(download_from_url, links[-1])
+
+        os.chdir(cwd)
+        
+        return dwnl_result
