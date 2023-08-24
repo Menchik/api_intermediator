@@ -2,6 +2,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 import time
+import shapefile
 
 from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
@@ -36,23 +37,36 @@ class planet_mm(base_intermediator):
                     }
                 ]
             }
-        self.change_AOI(aoi)
-        self.change_mosaic(mosaic_name)
+        self.set_AOI_geometry(aoi)
+        self.set_mosaic(mosaic_name)
 
     def authenticate(self):
         self.auth = HTTPBasicAuth(self.auth_key, '')
         self.session = requests.Session()
         self.session.auth = (self.auth_key, '')
 
-    def change_AOI(self, geometry):
+    def set_AOI_geometry(self, geometry):
         self.order_params['products'][0]['geometry'] = geometry
 
-    def change_AOI_from_file(self, file_path):
+    def set_AOI_geojson(self, file_path):
         file = open(file_path)
         geojson = json.load(file)
-        self.change_AOI(geojson['features'][0]['geometry'])
+        self.set_AOI_geometry(geojson['features'][0]['geometry'])
 
-    def change_mosaic(self, mosaic_name):
+    def set_AOI_shapefile(self, file_path):
+        # read the shapefile
+        reader = shapefile.Reader(file_path)
+        fields = reader.fields[1:]
+        field_names = [field[0] for field in fields]
+
+        #Get geometry from shapefile
+        geom = []
+        for sr in reader.shapeRecords():
+            geom.append(sr.shape.__geo_interface__)
+
+        self.set_AOI_geometry(geom[0])
+
+    def set_mosaic(self, mosaic_name):
         self.order_params['products'][0]['mosaic_name'] = mosaic_name
 
     def place_order(self):
