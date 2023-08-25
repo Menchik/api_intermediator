@@ -2,8 +2,8 @@ import os
 from osgeo_utils import gdal_merge
 
 def merge_tifs(tif_list):
-    tif_list.insert(0, '')
-    tif_list.insert(1, '-o')
+    merge_params = ['', '-o', 'merged.tif']
+    tif_list = merge_params + tif_list
     gdal_merge.gdal_merge(tif_list)
 
 def merge_tifs_in_folder(folder_path):
