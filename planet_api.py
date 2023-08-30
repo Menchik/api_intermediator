@@ -67,8 +67,8 @@ class planet_mm(base_intermediator):
 
         self.set_AOI_geometry(geom[0])
 
+
     def list_mosaics(self):
-        print("-Listing mosaics")
         response = self.session.get(self.MOSAIC_LIST_URL, auth=self.auth)
         basemaps = response.raise_for_status()
         if response.status_code != 204:
@@ -76,10 +76,19 @@ class planet_mm(base_intermediator):
 
         mosaic_list = []
         for mosaic_name in basemaps['mosaics']:
-            # print(mosaic_name['name'])
             mosaic_list.append(mosaic_name['name'])
+        self.print_mosaics(mosaic_list)
             
         return mosaic_list
+
+    def print_mosaics(self, mosaic_list):
+        for  i, mosaic_name in enumerate(mosaic_list):
+            print(f"{i} : {mosaic_name}")
+
+    def choose_mosaics(self, mosaic_value):
+        mosaic_list = self.list_mosaics()
+        self.set_mosaic(mosaic_list[mosaic_value])
+        return print(f"-Sucess, MOSAIC CHOOSE IS {mosaic_value} : {mosaic_list[mosaic_value]}!!")
 
     def set_mosaic(self, mosaic_name):
         self.order_params['products'][0]['mosaic_name'] = mosaic_name
@@ -109,8 +118,7 @@ class planet_mm(base_intermediator):
         return r
     
     def get_basemap(self):
-        order_url, mosaic_names = self.place_order()
-        print(mosaic_names)
+        order_url = self.place_order()
         return self.poll_for_success(order_url)
 
     def download_files(self, num_threads, result):
