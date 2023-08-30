@@ -8,7 +8,7 @@ from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
 import os
 
-from base_intermediator import base_intermediator
+from src.base_intermediator import base_intermediator
 
 def download_from_url(url):
     file_name_start_pos = url['name'].rfind("/") + 1
@@ -97,14 +97,14 @@ class planet_mm(base_intermediator):
         order_url = self.place_order()
         return self.poll_for_success(order_url)
 
-    def download_files(self, num_threads, result):
+    def download_files(self, num_threads, result, onAllArquives=True):
 
         #### num_threads = 0 for max threads possible
 
         cwd = os.getcwd()
  
         result = result.json()
-        links = result['_links']['results']
+        links = result['_links']['results'][0::(4** (not onAllArquives))]
 
         if not os.path.exists('./downloads'):
             os.mkdir('./downloads')
