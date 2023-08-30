@@ -26,6 +26,7 @@ class planet_mm(base_intermediator):
     def __init__(self, auth_key, aoi, mosaic_name):
         base_intermediator.__init__(self, auth_key)
         self.ORDERS_API_URL = 'https://api.planet.com/compute/ops/orders/v2'
+        self.MOSAIC_LIST_URL = 'https://api.planet.com/basemaps/v1/mosaics'
         self.order_params = {
                 "name": "basemap order with geometry",
                 "source_type": "basemaps",
@@ -66,6 +67,20 @@ class planet_mm(base_intermediator):
 
         self.set_AOI_geometry(geom[0])
 
+    def list_mosaics(self):
+        print("-Listing mosaics")
+        response = self.session.get(self.MOSAIC_LIST_URL, auth=self.auth)
+        basemaps = response.raise_for_status()
+        if response.status_code != 204:
+            basemaps = json.loads(response.text)
+
+        mosaic_list = []
+        for mosaic_name in basemaps['mosaics']:
+            # print(mosaic_name['name'])
+            mosaic_list.append(mosaic_name['name'])
+            
+        return mosaic_list
+
     def set_mosaic(self, mosaic_name):
         self.order_params['products'][0]['mosaic_name'] = mosaic_name
 
@@ -94,7 +109,8 @@ class planet_mm(base_intermediator):
         return r
     
     def get_basemap(self):
-        order_url = self.place_order()
+        order_url, mosaic_names = self.place_order()
+        print(mosaic_names)
         return self.poll_for_success(order_url)
 
     def download_files(self, num_threads, result):
