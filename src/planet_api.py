@@ -4,26 +4,16 @@ import json
 import time
 import shapefile
 
+from base_intermediator import base_intermediator
+
 from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
 import os
 
-from base_intermediator import base_intermediator
-
-def download_from_url(url):
-    file_name_start_pos = url['name'].rfind("/") + 1
-    file_name = url['name'][file_name_start_pos:]
-    try:
-        r = requests.get(url['location'], stream=True)
-        if r.status_code == requests.codes.ok:
-            with open(file_name, 'wb') as f:
-                for data in r:
-                    f.write(data)
-    except Exception as e:
-        print('Exception when downloading:', e)
+from utils import download_from_url
 
 class planet_mm(base_intermediator):
-    def __init__(self, auth_key, aoi, mosaic_name):
+    def __init__(self, auth_key):
         base_intermediator.__init__(self, auth_key)
         self.ORDERS_API_URL = 'https://api.planet.com/compute/ops/orders/v2'
         self.order_params = {
@@ -37,8 +27,6 @@ class planet_mm(base_intermediator):
                     }
                 ]
             }
-        self.set_AOI_geometry(aoi)
-        self.set_mosaic(mosaic_name)
 
     def authenticate(self):
         self.auth = HTTPBasicAuth(self.auth_key, '')
@@ -56,8 +44,6 @@ class planet_mm(base_intermediator):
     def set_AOI_shapefile(self, file_path):
         # read the shapefile
         reader = shapefile.Reader(file_path)
-        fields = reader.fields[1:]
-        field_names = [field[0] for field in fields]
 
         #Get geometry from shapefile
         geom = []
