@@ -4,26 +4,16 @@ import json
 import time
 import shapefile
 
+from base_intermediator import base_intermediator
+
 from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
 import os
 
-from base_intermediator import base_intermediator
-
-def download_from_url(url):
-    file_name_start_pos = url['name'].rfind("/") + 1
-    file_name = url['name'][file_name_start_pos:]
-    try:
-        r = requests.get(url['location'], stream=True)
-        if r.status_code == requests.codes.ok:
-            with open(file_name, 'wb') as f:
-                for data in r:
-                    f.write(data)
-    except Exception as e:
-        print('Exception when downloading:', e)
+from utils import download_from_url
 
 class planet_mm(base_intermediator):
-    def __init__(self, auth_key, aoi):
+    def __init__(self, auth_key):
         base_intermediator.__init__(self, auth_key)
         self.ORDERS_API_URL = 'https://api.planet.com/compute/ops/orders/v2'
         self.order_params = {
@@ -37,8 +27,6 @@ class planet_mm(base_intermediator):
                     }
                 ]
             }
-        self.set_AOI_geometry(aoi)
-        self.update_mosaics()
 
     def authenticate(self):
         self.auth = HTTPBasicAuth(self.auth_key, '')
@@ -56,8 +44,6 @@ class planet_mm(base_intermediator):
     def set_AOI_shapefile(self, file_path):
         # read the shapefile
         reader = shapefile.Reader(file_path)
-        fields = reader.fields[1:]
-        field_names = [field[0] for field in fields]
 
         #Get geometry from shapefile
         geom = []
@@ -65,28 +51,6 @@ class planet_mm(base_intermediator):
             geom.append(sr.shape.__geo_interface__)
 
         self.set_AOI_geometry(geom[0])
-
-
-    def update_mosaics(self):
-        MOSAIC_LIST_URL = 'https://api.planet.com/basemaps/v1/mosaics'
-        response = self.session.get(MOSAIC_LIST_URL, auth=self.auth)
-        basemaps = response.raise_for_status()
-        if response.status_code != 204:
-            basemaps = json.loads(response.text)
-
-        mosaics_list = []
-        for mosaic_name in basemaps['mosaics']:
-            mosaics_list.append(mosaic_name['name'])
-            
-        self.mosaics_list = mosaics_list
-
-    def print_mosaics(self):
-        for  i, mosaic_name in enumerate(self.mosaics_list):
-            print(f"{i} : {mosaic_name}")
-
-    def choose_mosaics(self, mosaic_value):
-        self.set_mosaic(self.mosaics_list[mosaic_value])
-        return print(f"-Chosen mosaic is ({mosaic_value}) : {self.mosaics_list[mosaic_value]}.")
 
     def set_mosaic(self, mosaic_name):
         self.order_params['products'][0]['mosaic_name'] = mosaic_name

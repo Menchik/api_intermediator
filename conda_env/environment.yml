@@ -1,0 +1,8 @@
+name: api
+channels:
+  - defaults
+dependencies:
+  - gdal
+  - requests
+  - pyshp
+  - ipykernel
