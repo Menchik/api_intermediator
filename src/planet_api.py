@@ -97,14 +97,14 @@ class planet_mm(base_intermediator):
         order_url = self.place_order()
         return self.poll_for_success(order_url)
 
-    def download_files(self, num_threads, result, allArquives=True):
+    def download_files(self, num_threads, result, allFiles=False):
 
         #### num_threads = 0 for max threads possible
 
         cwd = os.getcwd()
  
         result = result.json()
-        step = 4** (not allArquives)
+        step = 4** (not allFiles)
         links = result['_links']['results'][0::step]
 
         if not os.path.exists('./downloads'):
