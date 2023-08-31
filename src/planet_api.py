@@ -8,7 +8,7 @@ from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
 import os
 
-from src.base_intermediator import base_intermediator
+from base_intermediator import base_intermediator
 
 def download_from_url(url):
     file_name_start_pos = url['name'].rfind("/") + 1
