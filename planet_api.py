@@ -23,10 +23,9 @@ def download_from_url(url):
         print('Exception when downloading:', e)
 
 class planet_mm(base_intermediator):
-    def __init__(self, auth_key, aoi, mosaic_name):
+    def __init__(self, auth_key, aoi):
         base_intermediator.__init__(self, auth_key)
         self.ORDERS_API_URL = 'https://api.planet.com/compute/ops/orders/v2'
-        self.MOSAIC_LIST_URL = 'https://api.planet.com/basemaps/v1/mosaics'
         self.order_params = {
                 "name": "basemap order with geometry",
                 "source_type": "basemaps",
@@ -39,7 +38,7 @@ class planet_mm(base_intermediator):
                 ]
             }
         self.set_AOI_geometry(aoi)
-        self.set_mosaic(mosaic_name)
+        self.update_mosaics()
 
     def authenticate(self):
         self.auth = HTTPBasicAuth(self.auth_key, '')
@@ -68,27 +67,26 @@ class planet_mm(base_intermediator):
         self.set_AOI_geometry(geom[0])
 
 
-    def list_mosaics(self):
-        response = self.session.get(self.MOSAIC_LIST_URL, auth=self.auth)
+    def update_mosaics(self):
+        MOSAIC_LIST_URL = 'https://api.planet.com/basemaps/v1/mosaics'
+        response = self.session.get(MOSAIC_LIST_URL, auth=self.auth)
         basemaps = response.raise_for_status()
         if response.status_code != 204:
             basemaps = json.loads(response.text)
 
         mosaic_list = []
         for mosaic_name in basemaps['mosaics']:
-            mosaic_list.append(mosaic_name['name'])
-        self.print_mosaics(mosaic_list)
+            mosaics_list.append(mosaic_name['name'])
             
-        return mosaic_list
+        self.mosaics_list = mosaics_list
 
-    def print_mosaics(self, mosaic_list):
-        for  i, mosaic_name in enumerate(mosaic_list):
+    def print_mosaics(self):
+        for  i, mosaic_name in enumerate(self.mosaics_list):
             print(f"{i} : {mosaic_name}")
 
     def choose_mosaics(self, mosaic_value):
-        mosaic_list = self.list_mosaics()
-        self.set_mosaic(mosaic_list[mosaic_value])
-        return print(f"-Sucess, MOSAIC CHOOSE IS {mosaic_value} : {mosaic_list[mosaic_value]}!!")
+        self.set_mosaic(self.mosaics_list[mosaic_value])
+        return print(f"-Chose mosaic is ({mosaic_value}) : {mosaic_list[mosaic_value]}.")
 
     def set_mosaic(self, mosaic_name):
         self.order_params['products'][0]['mosaic_name'] = mosaic_name
