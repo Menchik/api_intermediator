@@ -74,7 +74,7 @@ class planet_mm(base_intermediator):
         if response.status_code != 204:
             basemaps = json.loads(response.text)
 
-        mosaic_list = []
+        mosaics_list = []
         for mosaic_name in basemaps['mosaics']:
             mosaics_list.append(mosaic_name['name'])
             
@@ -86,7 +86,7 @@ class planet_mm(base_intermediator):
 
     def choose_mosaics(self, mosaic_value):
         self.set_mosaic(self.mosaics_list[mosaic_value])
-        return print(f"-Chose mosaic is ({mosaic_value}) : {mosaic_list[mosaic_value]}.")
+        return print(f"-Chosen mosaic is ({mosaic_value}) : {self.mosaics_list[mosaic_value]}.")
 
     def set_mosaic(self, mosaic_name):
         self.order_params['products'][0]['mosaic_name'] = mosaic_name
