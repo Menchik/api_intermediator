@@ -1,6 +1,6 @@
+import os
 from osgeo_utils import gdal_merge
 import requests
-import os
 
 def download_from_url(url):
     file_name_start_pos = url['name'].rfind("/") + 1

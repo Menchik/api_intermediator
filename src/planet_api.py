@@ -4,8 +4,8 @@ import json
 import time
 import shapefile
 
-from src.base_intermediator import base_intermediator
-from src.utils import download_from_url
+from .base_intermediator import base_intermediator
+from .utils import download_from_url
 
 from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
@@ -27,7 +27,8 @@ class planet_mm(base_intermediator):
                     }
                 ]
             }
-        self.mosaic_list = self.update_mosaic()
+        self.mosaic_list = None
+        self.update_mosaic()
 
     def authenticate(self):
         self.auth = HTTPBasicAuth(self.auth_key, '')
@@ -62,9 +63,11 @@ class planet_mm(base_intermediator):
         if response.status_code != 204:
             basemaps = json.loads(response.text)
 
-        self.mosaic_list = []
+        mosaic_list = []
         for mosaic_name in basemaps['mosaics']:
             self.mosaic_list.append(mosaic_name['name'])
+
+        self.mosaic_list = mosaic_list
 
     def print_mosaic_list(self):
         for  i, mosaic_name in enumerate(self.mosaic_list):
@@ -72,7 +75,7 @@ class planet_mm(base_intermediator):
 
     def set_mosaic(self, mosaic_value):
         self.order_params['products'][0]['mosaic_name'] = self.mosaic_list[mosaic_value]
-        print(f"-Sucess, mosaic set is {mosaic_value} : \"{self.mosaic_list[mosaic_value]}\"")
+        print(f"-Sucess, mosaic set {mosaic_value} : \"{self.mosaic_list[mosaic_value]}\"")
 
     def place_order(self):
         print("-Placing order")
