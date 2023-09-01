@@ -2,7 +2,6 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 import time
-import shapefile
 
 from base_intermediator import base_intermediator
 

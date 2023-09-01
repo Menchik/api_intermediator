@@ -6,3 +6,5 @@ dependencies:
   - requests
   - pyshp
   - ipykernel
+  - pytest
+

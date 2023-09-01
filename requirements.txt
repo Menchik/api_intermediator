@@ -2,3 +2,4 @@ gdal
 requests
 pyshp
 ipykernel
+pytest
