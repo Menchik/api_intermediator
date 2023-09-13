@@ -18,9 +18,12 @@ from shapely.geometry import shape
 
 ERROR_TOO_MANY_QUADS = '{"field":null,"general":[{"message":"Unable to accept order: geometry for mosaic planet_medres_normalized_analytic_2015-12_2016-05_mosaic intersects'
 
+
 class planet_mm(base_intermediator):
     def __init__(self, auth_key):
         base_intermediator.__init__(self, auth_key)
+        self.mosaic_list = None
+        self.update_mosaic()
 
     def authenticate(self):
         self.auth = HTTPBasicAuth(self.auth_key, '')
@@ -46,8 +49,28 @@ class planet_mm(base_intermediator):
 
         self.set_AOI_geometry(geom[0])
 
-    def set_mosaic(self, mosaic_name):
-        self.mosaic = mosaic_name
+    def update_mosaic(self):
+        print("-Listing mosaics")
+        MOSAIC_LIST_URL = 'https://api.planet.com/basemaps/v1/mosaics'
+        response = self.session.get(MOSAIC_LIST_URL, auth=self.auth)
+        
+        basemaps = response.raise_for_status()
+        if response.status_code != 204:
+            basemaps = json.loads(response.text)
+
+        mosaic_list = []
+        for mosaic_name in basemaps['mosaics']:
+            self.mosaic_list.append(mosaic_name['name'])
+
+        self.mosaic_list = mosaic_list
+
+    def print_mosaic_list(self):
+        for  i, mosaic_name in enumerate(self.mosaic_list):
+            print(f"{i} : {mosaic_name}")
+
+    def set_mosaic(self, mosaic_value):
+        self.order_params['products'][0]['mosaic_name'] = self.mosaic_list[mosaic_value]
+        print(f"-Sucess, mosaic set {mosaic_value} : \"{self.mosaic_list[mosaic_value]}\"")
 
     def place_order(self, geometry):
         print("-Placing order")
@@ -147,9 +170,13 @@ class planet_mm(base_intermediator):
 
         return geoms
 
-    def download_files(self, num_threads, result):
+    def download_files(self, num_threads, result, allFiles=False):
 
-        #### num_threads = 0 for max threads possible ####j.download_files(num_threads=4, result=result[:36:4])j.download_files(num_threads=4, result=result[:36:4])
+        #### num_threads = 0 for max threads possible
+
+
+        step = 4** (not allFiles)
+        result = result[::step]
 
         if not os.path.exists('downloads'):
             os.mkdir('downloads')
