@@ -1,8 +1,10 @@
 name: api
 channels:
+  - conda-forge
   - defaults
 dependencies:
   - gdal
   - requests
   - pyshp
   - ipykernel
+  - shapely
