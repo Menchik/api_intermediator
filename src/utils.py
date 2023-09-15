@@ -1,4 +1,5 @@
 import os
+from osgeo import gdal
 from osgeo_utils import gdal_merge
 import requests
 
@@ -21,6 +22,7 @@ def download_from_url(url):
         print('Exception when downloading:', e)
 
 def merge_tifs(tif_list):
+    gdal.UseExceptions()
     merge_params = ['', '-o', 'merged.tif']
     tif_list = merge_params + tif_list
     gdal_merge.gdal_merge(tif_list)

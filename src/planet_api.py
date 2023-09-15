@@ -50,7 +50,6 @@ class planet_mm(base_intermediator):
         self.set_AOI_geometry(geom[0])
 
     def update_mosaic(self):
-        print("-Listing mosaics")
         MOSAIC_LIST_URL = 'https://api.planet.com/basemaps/v1/mosaics'
         response = self.session.get(MOSAIC_LIST_URL, auth=self.auth)
         
@@ -60,7 +59,7 @@ class planet_mm(base_intermediator):
 
         mosaic_list = []
         for mosaic_name in basemaps['mosaics']:
-            self.mosaic_list.append(mosaic_name['name'])
+            mosaic_list.append(mosaic_name['name'])
 
         self.mosaic_list = mosaic_list
 
@@ -69,7 +68,7 @@ class planet_mm(base_intermediator):
             print(f"{i} : {mosaic_name}")
 
     def set_mosaic(self, mosaic_value):
-        self.order_params['products'][0]['mosaic_name'] = self.mosaic_list[mosaic_value]
+        self.mosaic = self.mosaic_list[mosaic_value]
         print(f"-Sucess, mosaic set {mosaic_value} : \"{self.mosaic_list[mosaic_value]}\"")
 
     def place_order(self, geometry):
