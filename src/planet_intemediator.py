@@ -2,7 +2,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import json
 import time
-import shapefile
+from osgeo import ogr
 
 from .base_intermediator import base_intermediator
 
@@ -37,14 +37,19 @@ class planet_intemediator(base_intermediator):
         geojson = json.load(file)
         self.set_AOI_from_geometry(geojson['features'][0]['geometry'])
 
-    def set_AOI_from_shapefile(self, file_path):
-        # read the shapefile
-        reader = shapefile.Reader(file_path)
+    def set_AOI_shapefile(self, file_path):
+        ogr.DontUseExceptions()
 
-        #Get geometry from shapefile
         geom = []
-        for sr in reader.shapeRecords():
-            geom.append(sr.shape.__geo_interface__)
+
+        shapefile = ogr.Open(file_path)
+        layer = shapefile.GetLayer()
+
+        for feature in layer:
+            geometry = feature.GetGeometryRef() 
+            geometry = json.loads(geometry.ExportToJson())
+            
+            geom.append(geometry)
 
         self.set_AOI_from_geometry(geom[0])
 
