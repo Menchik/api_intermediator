@@ -16,7 +16,7 @@ class base_intermediator:
     def poll_for_success(self):
         pass
 
-    def get_basemap(self):
+    def get_images_links(self):
         pass
 
     def download_files(self):
