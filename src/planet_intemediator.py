@@ -18,25 +18,24 @@ from shapely.geometry import shape
 
 ERROR_TOO_MANY_QUADS = '{"field":null,"general":[{"message":"Unable to accept order: geometry for mosaic planet_medres_normalized_analytic_2015-12_2016-05_mosaic intersects'
 
-
-class planet_mm(base_intermediator):
+class planet_intemediator(base_intermediator):
     def __init__(self, auth_key):
         base_intermediator.__init__(self, auth_key)
         self.mosaic_list = None
-        self.update_mosaic()
+        self.update_mosaics()
 
     def authenticate(self):
         self.auth = HTTPBasicAuth(self.auth_key, '')
         self.session = requests.Session()
         self.session.auth = (self.auth_key, '')
 
-    def set_AOI_geometry(self, geometry):
+    def set_AOI_from_geometry(self, geometry):
         self.geometry = geometry
 
-    def set_AOI_geojson(self, file_path):
+    def set_AOI_from_geojson(self, file_path):
         file = open(file_path)
         geojson = json.load(file)
-        self.set_AOI_geometry(geojson['features'][0]['geometry'])
+        self.set_AOI_from_geometry(geojson['features'][0]['geometry'])
 
     def set_AOI_shapefile(self, file_path):
         ogr.DontUseExceptions()
@@ -52,9 +51,9 @@ class planet_mm(base_intermediator):
             
             geom.append(geometry)
 
-        self.set_AOI_geometry(geom[0])
+        self.set_AOI_from_geometry(geom[0])
 
-    def update_mosaic(self):
+    def update_mosaics(self):
         MOSAIC_LIST_URL = 'https://api.planet.com/basemaps/v1/mosaics'
         response = self.session.get(MOSAIC_LIST_URL, auth=self.auth)
         
@@ -77,7 +76,7 @@ class planet_mm(base_intermediator):
         print(f"-Sucess, mosaic set {mosaic_value} : \"{self.mosaic_list[mosaic_value]}\"")
 
     def place_order(self, geometry):
-        print("-Placing order")
+        print("--Placing order--")
 
         ORDERS_API_URL = 'https://api.planet.com/compute/ops/orders/v2'
         
@@ -107,7 +106,7 @@ class planet_mm(base_intermediator):
             return response
     
     def poll_for_success(self, order_url):
-        print("-Polling")
+        print("--Polling--")
         state = ''
         end_states = ['success', 'failed', 'partial']
         while state not in end_states:
@@ -120,7 +119,7 @@ class planet_mm(base_intermediator):
             time.sleep(10)
         return r
     
-    def get_links(self, geometry = None):
+    def get_images_links(self, geometry = None):
         try:
             geometry = geometry or self.geometry
             order_url = self.place_order(geometry)
@@ -136,17 +135,17 @@ class planet_mm(base_intermediator):
                 print(order_url.text)
 
     def too_many_quads(self, geometry):
-        print("Dividing geometry into smaller parts")
-        div_geoms = self.divide_geometry(geometry)
+        print("----Dividing geometry into smaller parts----")
+        div_geoms = self.divide_geom(geometry)
         
         links = []
         for geom in div_geoms:
-            r = self.get_links(geom)
+            r = self.get_images_links(geom)
             links = links + r[:-1]
         return links
 
 
-    def divide_geometry(self, geom):
+    def divide_geom(self, geom):
         sumy = 0
         minx = geom['coordinates'][0][0][0]
         maxx = geom['coordinates'][0][0][0]
