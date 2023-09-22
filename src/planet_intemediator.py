@@ -22,7 +22,7 @@ class planet_intemediator(base_intermediator):
     def __init__(self, auth_key):
         base_intermediator.__init__(self, auth_key)
         self.mosaic_list = None
-        self.update_mosaic()
+        self.update_mosaics()
 
     def authenticate(self):
         self.auth = HTTPBasicAuth(self.auth_key, '')
@@ -35,7 +35,7 @@ class planet_intemediator(base_intermediator):
     def set_AOI_from_geojson(self, file_path):
         file = open(file_path)
         geojson = json.load(file)
-        self.set_AOI_geometry(geojson['features'][0]['geometry'])
+        self.set_AOI_from_geometry(geojson['features'][0]['geometry'])
 
     def set_AOI_from_shapefile(self, file_path):
         # read the shapefile
@@ -46,7 +46,7 @@ class planet_intemediator(base_intermediator):
         for sr in reader.shapeRecords():
             geom.append(sr.shape.__geo_interface__)
 
-        self.set_AOI_geometry(geom[0])
+        self.set_AOI_from_geometry(geom[0])
 
     def update_mosaics(self):
         MOSAIC_LIST_URL = 'https://api.planet.com/basemaps/v1/mosaics'
@@ -131,11 +131,11 @@ class planet_intemediator(base_intermediator):
 
     def too_many_quads(self, geometry):
         print("----Dividing geometry into smaller parts----")
-        div_geoms = self.divide_geometry(geometry)
+        div_geoms = self.divide_geom(geometry)
         
         links = []
         for geom in div_geoms:
-            r = self.get_links(geom)
+            r = self.get_images_links(geom)
             links = links + r[:-1]
         return links
 
