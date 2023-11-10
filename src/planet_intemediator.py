@@ -37,7 +37,7 @@ class planet_intemediator(base_intermediator):
         geojson = json.load(file)
         self.set_AOI_from_geometry(geojson['features'][0]['geometry'])
 
-    def set_AOI_shapefile(self, file_path):
+    def set_AOI_from_shapefile(self, file_path):
         ogr.DontUseExceptions()
 
         geom = []

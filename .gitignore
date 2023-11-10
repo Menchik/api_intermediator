@@ -1,3 +1,5 @@
 __pycache__
 *.json
 downloads
+pantanal_shapefile
+src/sentinel_jupyter.ipynb
