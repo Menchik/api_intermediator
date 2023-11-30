@@ -3,7 +3,11 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - gdal
+  - planet
+  - geopandas
   - requests
   - ipykernel
   - shapely
+  - pyproj
+  - pySmartDL
+  - datetimerange

@@ -1,6 +1,5 @@
 class base_intermediator:
-    def __init__(self, auth_key):
-        self.auth_key=auth_key
+    def __init__(self):
         self.authenticate()
 
     def authenticate(self):
